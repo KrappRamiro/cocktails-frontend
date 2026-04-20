@@ -264,7 +264,7 @@ function allAvailableInCategory(items: Ingredient[]): boolean {
   return items.every((i) => i.is_available)
 }
 
-async function toggleAllInCategory(key: string, items: Ingredient[]) {
+async function toggleAllInCategory(_key: string, items: Ingredient[]) {
   const allAvailable = allAvailableInCategory(items)
   for (const item of items) {
     if (allAvailable && item.is_available) {

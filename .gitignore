@@ -8,3 +8,4 @@ devenv.local.yaml
 
 .env.local
 node_modules/
+dist/

@@ -17,7 +17,6 @@ import type {
   Ingredient,
   CocktailWithAvailability,
   CocktailsResponse,
-  IngredientsResponse,
   IngredientPayload,
   IngredientAvailabilityPayload,
   CocktailPayload,

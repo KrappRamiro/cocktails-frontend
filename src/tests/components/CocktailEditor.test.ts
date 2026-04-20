@@ -265,7 +265,6 @@ describe('CocktailEditor', () => {
     // Click × on the first step (index 0) — there's only a delete button, not move-up
     // The delete button is the last button sibling in the step row
     // We trigger a click on the form via wrapper to use Vue's reactivity
-    const vm = wrapper.vm as unknown as { form: { steps: string[] } }
     // Direct reactive manipulation is not exposed. Use the button click instead.
     // Steps delete buttons appear as × inside button elements that are NOT type=submit
     const allButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[type="button"]'))
@@ -302,7 +301,6 @@ describe('CocktailEditor', () => {
     await wrapper.vm.$nextTick() // extra tick for reactive array swap
 
     const textareas = document.querySelectorAll<HTMLTextAreaElement>('textarea')
-    const values = Array.from(textareas).map((t) => t.value)
     // After swap: description textarea still shows original text
     // But the reactive array has swapped — check via the component's form state
     // The textareas may not reflect v-model updates in happy-dom reliably,

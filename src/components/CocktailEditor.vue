@@ -119,7 +119,7 @@
             <section>
               <h3 class="text-sm font-semibold text-slate-700 mb-2">Pasos de preparación *</h3>
               <div class="space-y-2">
-                <div v-for="(step, i) in form.steps" :key="i" class="flex gap-2 items-start">
+                <div v-for="(_step, i) in form.steps" :key="i" class="flex gap-2 items-start">
                   <span class="text-xs text-slate-400 mt-2.5 w-5 text-right">{{ i + 1 }}.</span>
                   <textarea v-model="form.steps[i]" rows="2" class="flex-1 rounded-md border-slate-300 text-sm" />
                   <div class="flex flex-col gap-0.5">

@@ -1,12 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Must re-import after stubbing env
-async function importLogger() {
-  // Dynamic import so each test gets a fresh module with the current env
-  const mod = await import('@/utils/logger')
-  return mod.createLogger
-}
-
 describe('createLogger', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
