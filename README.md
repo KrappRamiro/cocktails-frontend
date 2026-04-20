@@ -10,7 +10,7 @@ The frontend is a Vue 3 Single Page Application deployed to Cloudflare Pages. It
 |---|---|---|
 | Node.js | 20+ | [nodejs.org](https://nodejs.org/) |
 | npm | 10+ | Comes with Node.js |
-| Backend Worker | running | See `worker/README.md` for setup |
+| Backend Worker | running | See the worker repo README for setup |
 
 ## Setup (local development)
 
