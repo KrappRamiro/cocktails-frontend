@@ -56,7 +56,7 @@ describe('AdminPanel', () => {
     it('shows login form when not authenticated', () => {
       const { wrapper } = mountAdmin()
       expect(wrapper.find('input[type="password"]').exists()).toBe(true)
-      expect(wrapper.text()).toContain('Panel de administración')
+      expect(wrapper.text()).toContain('Ingreso')
     })
 
     it('does not show panel content when not authenticated', () => {
@@ -93,7 +93,8 @@ describe('AdminPanel', () => {
       const { wrapper } = mountAdmin(authState)
       expect(wrapper.text()).toContain('Ingredientes')
       expect(wrapper.text()).toContain('Recetas')
-      expect(wrapper.text()).toContain('Vista previa')
+      expect(wrapper.text()).toContain('La Barra')
+      expect(wrapper.text()).toContain('Ajustes')
       wrapper.unmount()
     })
 
@@ -121,19 +122,19 @@ describe('AdminPanel', () => {
 
     it('switches to Recetas tab when clicked', async () => {
       const { wrapper } = mountAdmin(authState)
-      const recetasTab = wrapper.findAll('nav button').find((b) => b.text().includes('Recetas'))
-      await recetasTab!.trigger('click')
+      const recetasTab = wrapper.find('[data-testid="tab-recipes"]')
+      await recetasTab.trigger('click')
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('GT Clásico')
       wrapper.unmount()
     })
 
-    it('switches to Vista previa tab', async () => {
+    it('switches to Dashboard tab (La Barra)', async () => {
       const { wrapper } = mountAdmin(authState)
-      const previewTab = wrapper.findAll('nav button').find((b) => b.text().includes('Vista previa'))
-      await previewTab!.trigger('click')
+      const dashTab = wrapper.find('[data-testid="tab-dashboard"]')
+      await dashTab.trigger('click')
       await wrapper.vm.$nextTick()
-      expect(wrapper.text()).toContain('Disponibilidad')
+      expect(wrapper.text()).toContain('Disponibilidad total')
       expect(wrapper.text()).toContain('Ver menú público')
       wrapper.unmount()
     })

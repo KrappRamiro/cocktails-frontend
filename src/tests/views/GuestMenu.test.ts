@@ -14,6 +14,7 @@ const mockLoading = ref(true)
 const mockError = ref(null)
 const mockSelectedBase = ref(null)
 const mockSelectedTaste = ref(null)
+const mockSearchQuery = ref('')
 
 vi.mock('@/composables/useCocktails', () => ({
   useCocktails: () => ({
@@ -23,6 +24,7 @@ vi.mock('@/composables/useCocktails', () => ({
     error: mockError,
     selectedBase: mockSelectedBase,
     selectedTaste: mockSelectedTaste,
+    searchQuery: mockSearchQuery,
   }),
 }))
 
@@ -50,6 +52,7 @@ describe('GuestMenu', () => {
     mockError.value = null
     mockSelectedBase.value = null
     mockSelectedTaste.value = null
+    mockSearchQuery.value = ''
   })
 
   it('shows skeletons when loading', () => {
@@ -66,13 +69,13 @@ describe('GuestMenu', () => {
     expect(wrapper.text()).toContain('El menú se publicará pronto')
   })
 
-  it('shows "No hay tragos disponibles con estos filtros" when filtered to empty', async () => {
+  it('shows empty-state copy when filtered to empty', async () => {
     mockLoading.value = false
     mockStats.value = makeStats({ total: 45, available: 12 })
     mockCocktails.value = []
     const wrapper = mountGuest()
     await wrapper.vm.$nextTick()
-    expect(wrapper.text()).toContain('No hay tragos disponibles con estos filtros')
+    expect(wrapper.text()).toContain('Nada coincide con tu búsqueda')
   })
 
   it('renders CocktailCards when cocktails exist', async () => {

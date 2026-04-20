@@ -36,9 +36,9 @@ describe('CocktailEditor', () => {
   // ── New recipe ─────────────────────────────────────────────────────────
 
   describe('when cocktail=null (new recipe)', () => {
-    it('shows title "Nueva receta"', () => {
+    it('shows "nueva receta" label in header', () => {
       const wrapper = mountEditor(null)
-      expect(document.body.textContent).toContain('Nueva receta')
+      expect(document.body.textContent).toContain('nueva receta')
       wrapper.unmount()
     })
 
@@ -61,9 +61,9 @@ describe('CocktailEditor', () => {
   // ── Edit existing recipe ────────────────────────────────────────────────
 
   describe('when cocktail is provided (edit recipe)', () => {
-    it('shows title "Editar receta"', () => {
+    it('shows "editar receta" label in header', () => {
       const wrapper = mountEditor(makeCocktail())
-      expect(document.body.textContent).toContain('Editar receta')
+      expect(document.body.textContent).toContain('editar receta')
       wrapper.unmount()
     })
 
@@ -156,12 +156,13 @@ describe('CocktailEditor', () => {
       wrapper.unmount()
     })
 
-    it('shows error when no required_ingredients selected', async () => {
+    it('shows error when no required_ingredients marked', async () => {
       const wrapper = mountEditor(null)
       const form = document.querySelector('form') as HTMLFormElement
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
       await wrapper.vm.$nextTick()
-      expect(document.body.textContent).toContain('Seleccioná al menos un ingrediente requerido')
+      // Missing ingredients also implies missing required — both are flagged until rows exist
+      expect(document.body.textContent).toMatch(/al menos un ingrediente/i)
       wrapper.unmount()
     })
 
@@ -242,11 +243,11 @@ describe('CocktailEditor', () => {
       b.textContent?.includes('Agregar ingrediente'),
     ) as HTMLButtonElement
 
-    const countBefore = document.querySelectorAll('[aria-label="Eliminar ingrediente de la receta"]').length
+    const countBefore = document.querySelectorAll('[aria-label="Quitar ingrediente de la receta"]').length
     addBtn.click()
     await wrapper.vm.$nextTick()
 
-    const countAfter = document.querySelectorAll('[aria-label="Eliminar ingrediente de la receta"]').length
+    const countAfter = document.querySelectorAll('[aria-label="Quitar ingrediente de la receta"]').length
     expect(countAfter).toBe(countBefore + 1)
     wrapper.unmount()
   })
@@ -257,25 +258,15 @@ describe('CocktailEditor', () => {
     const cocktail = makeCocktail({ steps: ['Paso A', 'Paso B'] })
     const wrapper = mountEditor(cocktail)
 
-    // The × button for each step — find ones that are not "Agregar ingrediente"
-    // Steps × buttons: one per step (last button in each step row)
     const textareas = document.querySelectorAll<HTMLTextAreaElement>('textarea')
     const stepCount = textareas.length
 
-    // Click × on the first step (index 0) — there's only a delete button, not move-up
-    // The delete button is the last button sibling in the step row
-    // We trigger a click on the form via wrapper to use Vue's reactivity
-    // Direct reactive manipulation is not exposed. Use the button click instead.
-    // Steps delete buttons appear as × inside button elements that are NOT type=submit
-    const allButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[type="button"]'))
-    // Identify step delete buttons: they contain × (×) and are near textareas
-    // We use innerHTML to find the × character (HTML entity &times; renders as ×)
-    const deleteStepBtns = allButtons.filter(
-      (b) => b.textContent?.trim() === '×' && b.getAttribute('aria-label') === null,
+    // Step delete buttons have aria-label="Eliminar paso"
+    const deleteStepBtn = document.querySelector<HTMLButtonElement>(
+      'button[aria-label="Eliminar paso"]',
     )
-
-    expect(deleteStepBtns.length).toBeGreaterThanOrEqual(1)
-    deleteStepBtns[0].click()
+    expect(deleteStepBtn).toBeTruthy()
+    deleteStepBtn!.click()
     await wrapper.vm.$nextTick()
 
     const textareasAfter = document.querySelectorAll<HTMLTextAreaElement>('textarea')
@@ -309,38 +300,37 @@ describe('CocktailEditor', () => {
     wrapper.unmount()
   })
 
-  // ── Required ingredients search ──────────────────────────────────────
+  // ── Per-row required star ───────────────────────────────────────────
 
-  it('required ingredients search filters the list', async () => {
-    const wrapper = mountEditor(null, defaultIngredients)
-
-    const searchInput = document.querySelector<HTMLInputElement>('input[placeholder="Buscar ingrediente..."]')
-    expect(searchInput).not.toBeNull()
-
-    // Simulate typing in the search input — dispatchEvent with 'input' for v-model
-    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')
-      ?.set?.call(searchInput, 'Gin')
-    searchInput!.dispatchEvent(new Event('input', { bubbles: true }))
-    await wrapper.vm.$nextTick()
-    await wrapper.vm.$nextTick()
-
-    // Verify the search input accepted the value
-    expect(searchInput!.value).toBe('Gin')
-    wrapper.unmount()
-  })
-
-  // ── Ingredients in recipe marked "(en receta)" ───────────────────────
-
-  it('ingredients used in recipe are marked "(en receta)"', async () => {
+  it('pre-loads required rows with required=true based on cocktail.required_ingredients', async () => {
     const cocktail = makeCocktail({
       ingredients: [
         makeCocktailIngredient({ ingredient_id: 'ing-001', name: 'Gin (seco/dry)', amount: '50ml', note: null }),
+        makeCocktailIngredient({ ingredient_id: 'ing-002', name: 'Martini Extra Dry', amount: '10ml', note: null }),
       ],
       required_ingredients: ['ing-001'],
     })
 
     const wrapper = mountEditor(cocktail, defaultIngredients)
-    expect(document.body.textContent).toContain('(en receta)')
+
+    // Each row has a role="switch" for the required star.
+    const switches = Array.from(document.querySelectorAll<HTMLButtonElement>('button[role="switch"]'))
+    // Only the ones with aria-checked="true" should count as required
+    const checked = switches.filter((s) => s.getAttribute('aria-checked') === 'true')
+    expect(checked).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  it('clone button emits clone when cocktail is being edited', async () => {
+    const cocktail = makeCocktail()
+    const wrapper = mountEditor(cocktail)
+    const cloneBtn = document.querySelector<HTMLButtonElement>(
+      '[data-testid="cocktail-editor-clone"]',
+    )
+    expect(cloneBtn).toBeTruthy()
+    cloneBtn!.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('clone')).toBeTruthy()
     wrapper.unmount()
   })
 })

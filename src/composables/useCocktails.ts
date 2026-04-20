@@ -3,7 +3,7 @@
  *
  * - Fetch con filtros opcionales (base, taste)
  * - Auto-refresh cada 60 segundos, pausado cuando el tab no está visible
- * - Filtros sincronizados con URL query params
+ * - Filtros sincronizados con URL query params (base, taste, q)
  */
 
 import { ref, watch, onMounted, onUnmounted } from 'vue'
@@ -36,6 +36,7 @@ export function useCocktails() {
   const selectedTaste = ref<CocktailTaste | null>(
     (route.query.taste as CocktailTaste) || null,
   )
+  const searchQuery = ref<string>((route.query.q as string) ?? '')
 
   let intervalId: ReturnType<typeof setInterval> | null = null
 
@@ -67,15 +68,20 @@ export function useCocktails() {
     }
   }
 
-  // Sincronizar filtros con la URL (sin navegar)
+  // Sincronizar filtros con la URL (sin navegar). Preserva otros params (modo, tema).
   function syncFiltersToUrl() {
-    const query: Record<string, string> = {}
+    const query: Record<string, string> = { ...(route.query as Record<string, string>) }
     if (selectedBase.value) query.base = selectedBase.value
+    else delete query.base
     if (selectedTaste.value) query.taste = selectedTaste.value
+    else delete query.taste
+    if (searchQuery.value.trim()) query.q = searchQuery.value.trim()
+    else delete query.q
     router.replace({ query })
   }
 
-  // Debounced watch en filtros
+  // Debounced watch en filtros. `q` también actualiza la URL pero no dispara fetch
+  // (el filtrado por nombre es client-side).
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
   watch([selectedBase, selectedTaste], () => {
     syncFiltersToUrl()
@@ -85,6 +91,9 @@ export function useCocktails() {
       fetchCocktails()
     }, FILTER_DEBOUNCE)
   })
+
+  // El searchQuery solo afecta URL + filtrado local — no refetch
+  watch(searchQuery, () => syncFiltersToUrl())
 
   // Visibility-aware auto-refresh
   function startPolling() {
@@ -129,5 +138,6 @@ export function useCocktails() {
     error,
     selectedBase,
     selectedTaste,
+    searchQuery,
   }
 }

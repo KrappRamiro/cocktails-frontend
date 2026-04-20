@@ -45,19 +45,19 @@ describe('ConfirmDialog', () => {
     wrapper.unmount()
   })
 
-  it('applies red classes for danger style', () => {
+  it('applies danger class for danger style', () => {
     const wrapper = mountDialog({ confirmStyle: 'danger', confirmLabel: 'Eliminar' })
     const buttons = document.querySelectorAll('button')
     const confirmBtn = Array.from(buttons).find((b) => b.textContent?.includes('Eliminar'))
-    expect(confirmBtn?.className).toContain('bg-red-600')
+    expect(confirmBtn?.className).toContain('bg-danger')
     wrapper.unmount()
   })
 
-  it('applies sky classes for default style', () => {
+  it('applies accent class for default style', () => {
     const wrapper = mountDialog({ confirmStyle: 'default' })
     const buttons = document.querySelectorAll('button')
     const confirmBtn = Array.from(buttons).find((b) => b.textContent?.includes('Confirmar'))
-    expect(confirmBtn?.className).toContain('bg-sky-600')
+    expect(confirmBtn?.className).toContain('bg-accent')
     wrapper.unmount()
   })
 
@@ -73,8 +73,7 @@ describe('ConfirmDialog', () => {
 
   it('emits cancel when cancel button clicked', async () => {
     const wrapper = mountDialog()
-    const buttons = document.querySelectorAll('button')
-    const cancelBtn = Array.from(buttons).find((b) => b.textContent?.includes('Cancelar'))
+    const cancelBtn = document.querySelector('[data-testid="cancel-button"]') as HTMLElement
     cancelBtn?.click()
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('cancel')).toBeTruthy()
@@ -83,7 +82,9 @@ describe('ConfirmDialog', () => {
 
   it('emits cancel when backdrop clicked', async () => {
     const wrapper = mountDialog()
-    const backdrop = document.querySelector('.bg-black\\/50') as HTMLElement
+    // Backdrop is the sibling before the dialog — first absolute inset child
+    const dialog = document.querySelector('[role="alertdialog"]')
+    const backdrop = dialog?.previousElementSibling as HTMLElement | null
     backdrop?.click()
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('cancel')).toBeTruthy()

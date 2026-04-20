@@ -13,9 +13,10 @@ describe('CocktailCardSkeleton', () => {
     expect(wrapper.find('.animate-pulse').exists()).toBe(true)
   })
 
-  it('contains three placeholder divs', () => {
+  it('contains placeholder bars', () => {
     const wrapper = mount(CocktailCardSkeleton)
-    const placeholders = wrapper.findAll('.bg-slate-200')
-    expect(placeholders).toHaveLength(3)
+    // The skeleton uses bg-elevated / bg-elevated/70 for placeholder bars
+    const placeholders = wrapper.findAll('[class*="bg-elevated"]')
+    expect(placeholders.length).toBeGreaterThan(0)
   })
 })

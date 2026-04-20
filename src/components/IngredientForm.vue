@@ -1,20 +1,23 @@
 <template>
-  <form class="flex flex-wrap items-end gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200" @submit.prevent="handleSave">
-    <div class="flex-1 min-w-[180px]">
-      <label class="block text-xs font-medium text-slate-500 mb-1">Nombre</label>
+  <form
+    class="flex flex-wrap items-end gap-3 p-4 bg-elevated/60 rounded-deco border border-border-app/60"
+    @submit.prevent="handleSave"
+  >
+    <div class="flex-1 min-w-[200px]">
+      <label class="block small-caps text-[0.62rem] text-muted mb-1">Nombre</label>
       <input
         v-model="name"
         type="text"
         required
         minlength="2"
         placeholder="Nombre del ingrediente"
-        class="w-full rounded-md border-slate-300 text-sm"
+        class="w-full rounded-md border-border-app/70 bg-surface text-sm"
       />
     </div>
 
     <div class="w-48">
-      <label class="block text-xs font-medium text-slate-500 mb-1">Categoría</label>
-      <select v-model="category" required class="w-full rounded-md border-slate-300 text-sm">
+      <label class="block small-caps text-[0.62rem] text-muted mb-1">Categoría</label>
+      <select v-model="category" required class="w-full rounded-md border-border-app/70 bg-surface text-sm">
         <option value="" disabled>Seleccionar...</option>
         <option v-for="cat in categoryOrder" :key="cat.key" :value="cat.key">
           {{ cat.label }}
@@ -26,13 +29,13 @@
       <button
         type="submit"
         :disabled="!isValid"
-        class="px-3 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 small-caps text-xs font-medium text-ink-900 bg-accent rounded-full hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Guardar
       </button>
       <button
         type="button"
-        class="px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+        class="px-4 py-2 small-caps text-xs font-medium text-muted hover:text-fg rounded-full border border-border-app/70 transition-colors"
         @click="$emit('cancel')"
       >
         Cancelar

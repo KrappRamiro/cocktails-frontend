@@ -10,7 +10,7 @@ const ingredients = [
   makeIngredient({ id: '3', name: 'Tónica', category: 'mixers_gaseosas' }),
 ]
 
-function mountRow(value: Partial<CocktailIngredientPayload> = {}) {
+function mountRow(value: Partial<CocktailIngredientPayload> = {}, isRequired = false) {
   return mount(CocktailEditorIngredient, {
     props: {
       modelValue: {
@@ -20,6 +20,7 @@ function mountRow(value: Partial<CocktailIngredientPayload> = {}) {
         ...value,
       },
       ingredientOptions: ingredients,
+      isRequired,
     },
   })
 }
@@ -67,8 +68,15 @@ describe('CocktailEditorIngredient', () => {
 
   it('emits remove when remove button clicked', async () => {
     const wrapper = mountRow()
-    const removeBtn = wrapper.find('button[aria-label="Eliminar ingrediente de la receta"]')
+    const removeBtn = wrapper.find('button[aria-label="Quitar ingrediente de la receta"]')
     await removeBtn.trigger('click')
     expect(wrapper.emitted('remove')).toHaveLength(1)
+  })
+
+  it('emits toggle-required when star pressed', async () => {
+    const wrapper = mountRow({}, false)
+    const starBtn = wrapper.find('button[role="switch"]')
+    await starBtn.trigger('click')
+    expect(wrapper.emitted('toggle-required')).toHaveLength(1)
   })
 })

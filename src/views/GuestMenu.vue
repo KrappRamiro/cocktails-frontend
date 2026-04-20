@@ -1,76 +1,118 @@
 <template>
-  <div class="min-h-screen pb-8">
-    <!-- Header -->
-    <header data-testid="guest-header" class="bg-slate-800 text-white px-4 py-6 text-center">
-      <h1 class="text-2xl font-bold">{{ eventName }}</h1>
-      <p v-if="!loading" data-testid="available-count" class="mt-1 text-slate-300 text-sm">
-        {{ stats.available }} tragos disponibles esta noche
-      </p>
-      <div v-else class="mt-1 h-4 w-48 mx-auto bg-slate-600 rounded animate-pulse"></div>
-    </header>
+  <div class="min-h-screen pb-16 bg-base text-fg">
+    <GuestHeader :event-name="configStore.eventName" :stats="stats" :loading="loading" />
 
     <!-- Filtros + Buscador -->
-    <div class="px-4 py-3 sticky top-0 bg-slate-50 z-10 space-y-2">
-      <input
-        v-model="searchQuery"
-        data-testid="guest-search"
-        type="text"
-        placeholder="Buscar trago..."
-        class="w-full rounded-lg border-slate-300 text-sm px-3 py-2"
-      />
-      <FilterBar
-        :base="selectedBase"
-        :taste="selectedTaste"
-        @update:base="selectedBase = $event"
-        @update:taste="selectedTaste = $event"
-      />
+    <div class="sticky top-0 z-10 bg-base/85 backdrop-blur-sm border-b border-border-app/50">
+      <div class="mx-auto max-w-5xl px-4 py-3 space-y-3">
+        <label class="block relative">
+          <span class="sr-only">Buscar trago</span>
+          <svg
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3-3" />
+          </svg>
+          <input
+            v-model="searchQuery"
+            data-testid="guest-search"
+            type="search"
+            placeholder="Buscar trago..."
+            class="w-full rounded-full border-border-app/70 bg-surface text-sm pl-9 pr-3 py-2.5 focus:border-accent"
+          />
+        </label>
+        <FilterBar
+          :base="selectedBase"
+          :taste="selectedTaste"
+          @update:base="selectedBase = $event"
+          @update:taste="selectedTaste = $event"
+        />
+      </div>
     </div>
 
     <!-- Contenido -->
-    <main class="px-4 mt-2">
-      <!-- Loading -->
-      <div v-if="loading" data-testid="loading-skeletons" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+    <main class="mx-auto max-w-5xl px-4 mt-6">
+      <div
+        v-if="loading"
+        data-testid="loading-skeletons"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
         <CocktailCardSkeleton v-for="n in 6" :key="n" />
       </div>
 
-      <!-- Sin resultados -->
-      <div v-else-if="filteredCocktails.length === 0 && stats.available === 0" data-testid="empty-menu" class="text-center py-16 text-slate-400">
-        <p class="text-lg">El menú se publicará pronto.</p>
+      <div
+        v-else-if="filteredCocktails.length === 0 && stats.available === 0"
+        data-testid="empty-menu"
+        class="text-center py-24 text-muted"
+      >
+        <p class="font-display text-2xl text-fg/80 mb-2">El menú se publicará pronto.</p>
+        <p class="small-caps text-[0.7rem] text-muted">vuelve más tarde</p>
       </div>
 
-      <div v-else-if="filteredCocktails.length === 0" data-testid="no-results" class="text-center py-16 text-slate-400">
-        <p class="text-lg">No hay tragos disponibles con estos filtros</p>
+      <div
+        v-else-if="filteredCocktails.length === 0"
+        data-testid="no-results"
+        class="text-center py-24 text-muted"
+      >
+        <p class="font-display text-2xl text-fg/80 mb-2">Nada coincide con tu búsqueda.</p>
+        <p class="small-caps text-[0.7rem] text-muted">probá otros filtros</p>
       </div>
 
-      <!-- Grid de cocktails -->
-      <div v-else data-testid="cocktails-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        <CocktailCard
-          v-for="cocktail in filteredCocktails"
-          :key="cocktail.id"
-          :cocktail="cocktail"
-        />
+      <div
+        v-else
+        data-testid="cocktails-grid"
+        :class="[
+          'grid gap-4',
+          modo === 'barra'
+            ? 'grid-cols-1 xl:grid-cols-2'
+            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+        ]"
+      >
+        <template v-for="cocktail in filteredCocktails" :key="cocktail.id">
+          <GuestCardFull v-if="modo === 'barra'" :cocktail="cocktail" />
+          <GuestCardCompact v-else :cocktail="cocktail" />
+        </template>
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useCocktails } from '@/composables/useCocktails'
+import { useModoBarra } from '@/composables/useModoBarra'
+import { useTheme } from '@/composables/useTheme'
+import { useConfigStore } from '@/stores/configStore'
+import { matchesSearch } from '@/utils/normalize'
 import FilterBar from '@/components/FilterBar.vue'
-import CocktailCard from '@/components/CocktailCard.vue'
+import GuestHeader from '@/components/guest/GuestHeader.vue'
+import GuestCardCompact from '@/components/guest/GuestCardCompact.vue'
+import GuestCardFull from '@/components/guest/GuestCardFull.vue'
 import CocktailCardSkeleton from '@/components/CocktailCardSkeleton.vue'
 
-const eventName = import.meta.env.VITE_EVENT_NAME || 'Evento'
-const searchQuery = ref('')
+// Activate URL syncing for theme + modo
+useTheme()
+const { modo } = useModoBarra()
 
-const { cocktails, stats, loading, selectedBase, selectedTaste } = useCocktails()
+const configStore = useConfigStore()
+const { cocktails, stats, loading, selectedBase, selectedTaste, searchQuery } = useCocktails()
+
+onMounted(() => {
+  configStore.loadConfig()
+})
 
 const filteredCocktails = computed(() => {
-  const q = searchQuery.value.toLowerCase().trim()
+  const q = searchQuery.value
   if (!q) return cocktails.value
-  return cocktails.value.filter((c) =>
-    c.name.toLowerCase().includes(q)
-  )
+  return cocktails.value.filter((c) => matchesSearch(c.name, q))
 })
 </script>

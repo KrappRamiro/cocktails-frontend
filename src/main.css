@@ -1,3 +1,167 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Art Deco / Speakeasy design tokens
+ * Stored as space-separated RGB triplets so Tailwind utilities can apply alpha
+ * via rgb(var(--xxx) / <alpha-value>).
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Palette (raw) */
+  --brass-400: 232 200 136;
+  --brass-500: 201 168 106;
+  --brass-600: 164 135 63;
+  --burgundy-700: 107 26 44;
+  --burgundy-800: 74 18 32;
+  --burgundy-900: 46 12 20;
+  --ink-900: 15 11 10;
+  --ink-800: 26 20 19;
+  --ink-700: 37 28 26;
+  --ink-600: 58 47 44;
+  --bone-50: 248 241 228;
+  --bone-100: 239 229 208;
+  --bone-300: 184 174 152;
+  --bone-500: 122 112 93;
+
+  /* Shared semantic tokens */
+  --accent: var(--brass-500);
+  --accent-hover: var(--brass-400);
+  --ring: 201 168 106;
+}
+
+:root.theme-dark {
+  --bg-base: var(--ink-900);
+  --bg-surface: var(--ink-800);
+  --bg-elevated: var(--ink-700);
+  --fg-primary: var(--bone-50);
+  --fg-muted: var(--bone-300);
+  --danger: var(--burgundy-700);
+  --border: 46 35 32;
+  --accent-hover: var(--brass-400);
+  color-scheme: dark;
+}
+
+:root.theme-light {
+  --bg-base: var(--bone-50);
+  --bg-surface: 255 255 255;
+  --bg-elevated: var(--bone-100);
+  --fg-primary: var(--ink-900);
+  --fg-muted: var(--ink-600);
+  --danger: 155 28 59;
+  --border: var(--bone-100);
+  --accent-hover: var(--brass-600);
+  color-scheme: light;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Base typography + body
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: rgb(var(--bg-base));
+    color: rgb(var(--fg-primary));
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  h1 { line-height: 1.1; }
+  h2 { line-height: 1.15; }
+
+  /* Focus ring consistent with accent */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Form defaults that respect the theme */
+  input[type='text'],
+  input[type='password'],
+  input[type='email'],
+  input[type='number'],
+  input[type='search'],
+  select,
+  textarea {
+    background-color: rgb(var(--bg-surface));
+    color: rgb(var(--fg-primary));
+    border-color: rgb(var(--border));
+  }
+
+  input[type='text']:focus,
+  input[type='password']:focus,
+  input[type='email']:focus,
+  input[type='number']:focus,
+  input[type='search']:focus,
+  select:focus,
+  textarea:focus {
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 2px rgb(var(--accent) / 0.25);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(var(--fg-muted) / 0.75);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Utility additions
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .small-caps {
+    font-variant: small-caps;
+    letter-spacing: 0.14em;
+  }
+
+  .scrollbar-hidden {
+    scrollbar-width: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bg-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+            mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Deco ornaments (reusable hairlines for dividers and card edges)
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+.deco-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgb(var(--accent));
+}
+.deco-rule::before,
+.deco-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(var(--accent) / 0.5) 20%,
+    rgb(var(--accent) / 0.5) 80%,
+    transparent
+  );
+}

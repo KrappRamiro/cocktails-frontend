@@ -45,32 +45,32 @@ describe('ToastNotification', () => {
     })
   })
 
-  it('applies green class for success', () => {
+  it('applies accent class for success', () => {
     const { wrapper, store } = mountToast()
     store.toasts = [{ id: 1, message: 'OK', type: 'success' }]
     return wrapper.vm.$nextTick().then(() => {
       const alert = document.querySelector('[role="alert"]')
-      expect(alert?.className).toContain('bg-emerald-600')
+      expect(alert?.className).toMatch(/bg-accent/)
       wrapper.unmount()
     })
   })
 
-  it('applies red class for error', () => {
+  it('applies danger class for error', () => {
     const { wrapper, store } = mountToast()
     store.toasts = [{ id: 1, message: 'Fail', type: 'error' }]
     return wrapper.vm.$nextTick().then(() => {
       const alert = document.querySelector('[role="alert"]')
-      expect(alert?.className).toContain('bg-red-600')
+      expect(alert?.className).toMatch(/bg-danger/)
       wrapper.unmount()
     })
   })
 
-  it('applies sky class for info', () => {
+  it('applies elevated class for info', () => {
     const { wrapper, store } = mountToast()
     store.toasts = [{ id: 1, message: 'Info', type: 'info' }]
     return wrapper.vm.$nextTick().then(() => {
       const alert = document.querySelector('[role="alert"]')
-      expect(alert?.className).toContain('bg-sky-600')
+      expect(alert?.className).toMatch(/bg-elevated/)
       wrapper.unmount()
     })
   })
@@ -79,7 +79,9 @@ describe('ToastNotification', () => {
     const { wrapper, store } = mountToast()
     store.toasts = [{ id: 42, message: 'Hello', type: 'info' }]
     await wrapper.vm.$nextTick()
-    const closeBtn = document.querySelector('[aria-label="Cerrar notificación"]') as HTMLElement
+    // Scope to the alert to avoid matching any other close button that may exist
+    const alert = document.querySelector('[role="alert"]')
+    const closeBtn = alert?.querySelector('[aria-label="Cerrar notificación"]') as HTMLElement
     closeBtn?.click()
     await wrapper.vm.$nextTick()
     expect(store.toasts).toHaveLength(0)

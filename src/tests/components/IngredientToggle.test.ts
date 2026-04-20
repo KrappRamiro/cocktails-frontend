@@ -32,14 +32,14 @@ describe('IngredientToggle', () => {
     expect(wrapper.text()).toContain('Vodka (neutro)')
   })
 
-  it('applies emerald class when available', () => {
+  it('applies accent class when available', () => {
     const wrapper = mountToggle({ is_available: true })
-    expect(wrapper.find('[role="switch"]').classes()).toContain('bg-emerald-500')
+    expect(wrapper.find('[role="switch"]').classes()).toContain('bg-accent')
   })
 
-  it('applies slate class when not available', () => {
+  it('applies muted class when not available', () => {
     const wrapper = mountToggle({ is_available: false })
-    expect(wrapper.find('[role="switch"]').classes()).toContain('bg-slate-300')
+    expect(wrapper.find('[role="switch"]').classes()).toContain('bg-elevated')
   })
 
   it('emits toggle when switch clicked', async () => {
