@@ -22,7 +22,7 @@ test.describe('Guest Menu', () => {
     const count = page.getByTestId('available-count')
     // Wait for the count to appear (loading finishes)
     await expect(count).toBeVisible({ timeout: 10000 })
-    await expect(count).toContainText('tragos disponibles esta noche')
+    await expect(count).toContainText('tragos disponibles este evento')
   })
 
   test('renders filter tabs for base and taste', async ({ page }) => {

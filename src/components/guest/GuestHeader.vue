@@ -34,7 +34,7 @@
         <p v-if="!loading" class="text-sm text-muted font-sans">
           <span data-testid="available-count">{{ stats.available }}</span>
           <span class="small-caps text-[0.7rem] ml-1">
-            tragos disponibles esta noche
+            tragos disponibles este evento
           </span>
         </p>
         <div v-else class="mt-1 h-4 w-56 mx-auto bg-elevated rounded animate-pulse" />

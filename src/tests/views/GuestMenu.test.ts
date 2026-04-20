@@ -93,7 +93,7 @@ describe('GuestMenu', () => {
     mockStats.value = makeStats({ available: 7 })
     const wrapper = mountGuest()
     await wrapper.vm.$nextTick()
-    expect(wrapper.text()).toContain('7 tragos disponibles esta noche')
+    expect(wrapper.text()).toContain('7 tragos disponibles este evento')
   })
 
   it('renders FilterBar', () => {
